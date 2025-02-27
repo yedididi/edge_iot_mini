@@ -244,11 +244,11 @@ void send_msg(MSG_INFO *msg_info, CLIENT_INFO *first_client_info)
 		getlocaltime(msg_info->msg);
 		write(msg_info->fd, msg_info->msg, strlen(msg_info->msg));
 	}
-	else //보내는 대상이 특정 클라이언트, 가장 일반적적
+	else //보내는 대상이 특정 클라이언트, 가장 일반적
 	{
 		for (i = 0; i < MAX_CLNT; i++)
 		{
-			if ((first_client_info + i)->fd != -1)	//보내려는 클라이언트를 찾는다다
+			if ((first_client_info + i)->fd != -1)	//보내려는 클라이언트를 찾는다
 			{
 				if(!strcmp(msg_info->to, (first_client_info+i)->id))
 					write((first_client_info + i)->fd, msg_info->msg, msg_info->len);
