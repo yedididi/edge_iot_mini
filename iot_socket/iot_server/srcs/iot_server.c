@@ -1,49 +1,4 @@
-/* author : KSH */
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <sys/time.h>
-#include <time.h>
-#include <errno.h>
-
-#define BUF_SIZE 100
-#define MAX_CLNT 32
-#define ID_SIZE 10
-#define ARR_CNT 5
-
-#define DEBUG
-typedef struct 
-{
-	char fd;
-	char *from;
-	char *to;
-	char *msg;
-	int len;
-} MSG_INFO;
-
-typedef struct 
-{
-	int index;
-	int fd;
-	char ip[20];
-	char id[ID_SIZE];
-	char pw[ID_SIZE];
-} CLIENT_INFO;
-
-void *clnt_connection(void *arg);
-void send_msg(MSG_INFO *msg_info, CLIENT_INFO *first_client_info);
-void error_handling(char *msg);
-void log_file(char *msgstr);
-void  getlocaltime(char *buf);
+#include "../incs/main.h"
 
 int clnt_cnt = 0;
 pthread_mutex_t mutx;
@@ -52,7 +7,7 @@ int main(int argc, char *argv[])
 {
 	int serv_sock, clnt_sock;
 	struct sockaddr_in serv_adr, clnt_adr;
-	int clnt_adr_sz;
+	socklen_t clnt_adr_sz;
 	int sock_option  = 1;
 	pthread_t t_id[MAX_CLNT] = {0};
 	int str_len = 0;
@@ -83,17 +38,19 @@ int main(int argc, char *argv[])
 		{0,-1,"","HM_CON","PASSWD"}
 	};
 
-	if (argc != 2) 
+	if (argc != 2)
 	{
 		printf("Usage : %s <port>\n",argv[0]);
 		exit(1);
 	}
-	
+
 	fputs("IoT Server Start!!\n", stdout);
 
 	if (pthread_mutex_init(&mutx, NULL))
 		error_handling("mutex init error");
 
+
+	//socket connetion setting
 	serv_sock = socket(PF_INET, SOCK_STREAM, 0);
 
 	memset(&serv_adr, 0, sizeof(serv_adr));
@@ -101,24 +58,27 @@ int main(int argc, char *argv[])
 	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serv_adr.sin_port = htons(atoi(argv[1]));
 
-	setsockopt(serv_sock, SOL_SOCKET, SO_REUSEADDR, (void*)&sock_option, sizeof(sock_option));
+	setsockopt(serv_sock, SOL_SOCKET, SO_REUSEADDR, (void *)&sock_option, sizeof(sock_option));
 	if (bind(serv_sock, (struct sockaddr *)&serv_adr, sizeof(serv_adr)) == -1)
 		error_handling("bind() error");
 
 	if (listen(serv_sock, 5) == -1)
 		error_handling("listen() error");
 
+
+
+	//start connection with accept, never ending loop
 	while (1) 
 	{
 		clnt_adr_sz = sizeof(clnt_adr);
 		clnt_sock = accept(serv_sock, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
-		if (clnt_cnt >= MAX_CLNT)
+		if (clnt_cnt >= MAX_CLNT) //when socket is full
 		{
 			printf("socket full\n");
 			shutdown(clnt_sock, SHUT_WR);
 			continue;
 		}
-		else if (clnt_sock < 0)
+		else if (clnt_sock < 0) //when accept returns wrong things -> accept error
 		{
 			perror("accept()");
 			continue;
@@ -127,23 +87,24 @@ int main(int argc, char *argv[])
 		str_len = read(clnt_sock, idpasswd, sizeof(idpasswd));
 		idpasswd[str_len] = '\0';
 
-		if (str_len > 0)
+		if (str_len > 0) //read ok
 		{
 			i = 0;
 			pToken = strtok(idpasswd,"[:]");
 
-			while (pToken != NULL)
+			while (pToken != NULL) //split[:] read buffer into pArray
 			{
 				pArray[i] =  pToken;
 				if (i++ >= ARR_CNT)
 					break;	
 				pToken = strtok(NULL,"[:]");
 			}
+
 			for (i = 0; i < MAX_CLNT; i++)
 			{
-				if (!strcmp(client_info[i].id, pArray[0]))
+				if (!strcmp(client_info[i].id, pArray[0])) //find matching client_info id
 				{
-					if (client_info[i].fd != -1)
+					if (client_info[i].fd != -1) //if it is already logged in
 					{
 						sprintf(msg, "[%s] Already logged!\n", pArray[0]);
 						write(clnt_sock, msg, strlen(msg));
@@ -154,25 +115,25 @@ int main(int argc, char *argv[])
 #endif  
 						break;
 					}
-					if (!strcmp(client_info[i].pw,pArray[1])) 
+					if (!strcmp(client_info[i].pw, pArray[1])) //if password matches
 					{
 						strcpy(client_info[i].ip, inet_ntoa(clnt_adr.sin_addr));
 						pthread_mutex_lock(&mutx);
 						client_info[i].index = i; 
-						client_info[i].fd = clnt_sock; 
+						client_info[i].fd = clnt_sock;
 						clnt_cnt++;
 						pthread_mutex_unlock(&mutx);
 						sprintf(msg,"[%s] New connected! (ip:%s,fd:%d,sockcnt:%d)\n", pArray[0], inet_ntoa(clnt_adr.sin_addr), clnt_sock, clnt_cnt);
 						log_file(msg);
 						write(clnt_sock, msg, strlen(msg));
 
-						pthread_create(t_id+i, NULL, clnt_connection, (void *)(client_info + i));
+						pthread_create(t_id + i, NULL, clnt_connection, (void *)(client_info + i)); //start thread
 						pthread_detach(t_id[i]);
 						break;
 					}
 				}
 			}
-			if (i == MAX_CLNT)
+			if (i == MAX_CLNT) //위 for 문 다 돌은 경우 = 저장되어 있는 id랑 일치하는 것이 없는 경우
 			{
 				sprintf(msg,"[%s] Authentication Error!\n", pArray[0]);
 				write(clnt_sock, msg,strlen(msg));
@@ -180,7 +141,7 @@ int main(int argc, char *argv[])
 				shutdown(clnt_sock, SHUT_WR);
 			}
 		}
-		else 
+		else //read error
 			shutdown(clnt_sock, SHUT_WR);
 	}
 	return 0;
@@ -205,14 +166,15 @@ void * clnt_connection(void *arg)
 	while (1)
 	{
 		memset(msg, 0x0, sizeof(msg));
-		str_len = read(client_info->fd, msg, sizeof(msg) - 1); 
-		if (str_len <= 0)
-				break;
+		str_len = read(client_info->fd, msg, sizeof(msg) - 1); //연결이 완료된 소켓으로부터 새로운 메시지를 기다리고, 받음
+		if (str_len <= 0) //read error
+			break;
 
 		msg[str_len] = '\0';
 		pToken = strtok(msg, "[:]");
+
 		i = 0; 
-		while (pToken != NULL)
+		while (pToken != NULL) //pArray에 읽어온 값을 : 으로 split해서 넣는다
 		{
 			pArray[i] =  pToken;
 			if (i++ >= ARR_CNT)
@@ -220,6 +182,7 @@ void * clnt_connection(void *arg)
 			pToken = strtok(NULL,"[:]");
 		}
 
+		//보낼 값들 집어넣기
 		msg_info.fd = client_info->fd;
 		msg_info.from = client_info->id;
 		msg_info.to = pArray[0];
@@ -245,11 +208,11 @@ void * clnt_connection(void *arg)
 	return 0;
 }
 
-void send_msg(MSG_INFO * msg_info, CLIENT_INFO * first_client_info)
+void send_msg(MSG_INFO *msg_info, CLIENT_INFO *first_client_info)
 {
 	int i = 0;
 
-	if (!strcmp(msg_info->to,"ALLMSG"))
+	if (!strcmp(msg_info->to, "ALLMSG")) //보내는 대상이 ALLMSG
 	{
 		for (i = 0; i < MAX_CLNT; i++)
 		{
@@ -257,7 +220,7 @@ void send_msg(MSG_INFO * msg_info, CLIENT_INFO * first_client_info)
 				write((first_client_info + i)->fd, msg_info->msg, msg_info->len);
 		}
 	}
-	else if(!strcmp(msg_info->to,"IDLIST"))
+	else if (!strcmp(msg_info->to, "IDLIST")) //보내는 대상이 IDLIST
 	{
 		char* idlist = (char *)malloc(ID_SIZE * MAX_CLNT);
 		msg_info->msg[strlen(msg_info->msg) - 1] = '\0';
@@ -275,17 +238,17 @@ void send_msg(MSG_INFO * msg_info, CLIENT_INFO * first_client_info)
 		write(msg_info->fd, idlist, strlen(idlist));
 		free(idlist);
 	}
-	else if (!strcmp(msg_info->to,"GETTIME"))
+	else if (!strcmp(msg_info->to, "GETTIME")) //보내는 대상이 GETTIME
 	{
 		sleep(1);
 		getlocaltime(msg_info->msg);
 		write(msg_info->fd, msg_info->msg, strlen(msg_info->msg));
 	}
-	else
+	else //보내는 대상이 특정 클라이언트, 가장 일반적적
 	{
 		for (i = 0; i < MAX_CLNT; i++)
 		{
-			if ((first_client_info + i)->fd != -1)	
+			if ((first_client_info + i)->fd != -1)	//보내려는 클라이언트를 찾는다다
 			{
 				if(!strcmp(msg_info->to, (first_client_info+i)->id))
 					write((first_client_info + i)->fd, msg_info->msg, msg_info->len);
