@@ -1,6 +1,7 @@
 CC = cc
 NAME = server
 CFLAGS = -Wall -Wextra -Werror
+LDFLAGS = -lbluetooth -pthread
 INCS = incs
 SRCS = $(wildcard srcs/*.c)
 OBJS = $(SRCS:.c=.o)
@@ -11,7 +12,7 @@ OBJS = $(SRCS:.c=.o)
 all : $(NAME)
 
 $(NAME) : $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LDFLAGS)
 
 clean :
 	$(RM) $(OBJS)

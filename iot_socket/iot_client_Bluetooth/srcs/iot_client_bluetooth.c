@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	pthread_create(&snd_thread, NULL, send_msg, (void *)&dev_fd);
 
 	pthread_join(snd_thread, &thread_return);
-		// pthread_join(rcv_thread, &thread_return);
+	// pthread_join(rcv_thread, &thread_return);
 
 	close(dev_fd.sockfd);
 	return 0;
