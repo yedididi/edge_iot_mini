@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
 
 	if(argc != 4) 
 	{
-		printf("Usage : %s <IP> <port> <name>\n",argv[0]);
+		printf("Usage : %s <IP> <port> <name>\n", argv[0]);
 		exit(1);
 	}
-	sprintf(name, "%s",argv[3]);
+	sprintf(name, "%s", argv[3]);
 
 
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void *send_msg(void *arg) //서버한테 표준입력으로 받은 메시지 보내기기
+void *send_msg(void *arg) //서버한테 표준입력으로 받은 메시지 보내기
 {
 	int *sock = (int *)arg;
 	int str_len;
@@ -98,7 +98,7 @@ void *send_msg(void *arg) //서버한테 표준입력으로 받은 메시지 보
 			else
 				strcpy(name_msg, msg);
 
-			if (write(*sock, name_msg, strlen(name_msg)) <= 0) //서버한테 입력 쓰기기
+			if (write(*sock, name_msg, strlen(name_msg)) <= 0) //서버한테 입력 쓰기
 			{
   				*sock = -1;
 				return NULL;
