@@ -39,8 +39,9 @@ typedef struct s_time_info
 	int hour_until_alarm; 	//0~23
 	int minute_until_alarm; //0~59
 	int led;				//0~10
-	bool buzzer;			//0 or 1
-	bool motor;				//0 or 1
+	int buzzer;			//0 or 1
+	int motor;				//0 or 1
+	int buttonPressed;
 	time_t timer;
 	struct tm *t;
 } t_time_info;
@@ -73,8 +74,8 @@ void	log_file(char *msgstr);
 void	getlocaltime(char *buf);
 
 //socket.c
-void serverOpen(char *argv[], pthread_mutex_t mutx, t_time_info *time_info);
-void		bluetoothConnect(char dest[18], t_time_info *time_info);
+void 	serverOpen(char *argv[], pthread_mutex_t mutx, t_time_info *time_info);
+void	bluetoothConnect(char dest[18], t_time_info *time_info);
 
 //stmThread.c
 void	*stm_connection(void *arg);

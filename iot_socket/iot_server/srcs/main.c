@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		time_info = updateTime(time_info);
-		printTime(time_info);
-		sleep(1);
+		// printTime(time_info);
+		usleep(100);
 	}
 	return 0;
 }

@@ -26,5 +26,11 @@ t_time_info *initMain(int argc, char *argv[], pthread_mutex_t *mutx)
 	time_info->hour = time_info->t->tm_hour;
 	time_info->minute = time_info->t->tm_min;
 	time_info->sec = time_info->t->tm_sec;
+	time_info->hour_until_alarm = 0;
+	time_info->minute_until_alarm = 0;
+	time_info->led = 0;
+	time_info->buzzer = 0;
+	time_info->motor = 0;
+	time_info->buttonPressed = 0;
 	return (time_info);
 }
