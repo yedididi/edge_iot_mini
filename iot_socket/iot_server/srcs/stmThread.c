@@ -2,6 +2,7 @@
 
 void	*stm_connection(void *arg)
 {
+	printf("start stm thread\n");
 	(void)arg;
 	return (0);
 	// t_client_info *client_info = (t_client_info *)arg;

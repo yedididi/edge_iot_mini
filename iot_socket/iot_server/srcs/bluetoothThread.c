@@ -11,7 +11,7 @@ void *bluetoothThread(void *arg)  //server --> bluetooth
 		memset(name_msg, 0x0, sizeof(name_msg));
 		sprintf(name_msg, "%d:%d:%d\n", t->hour, t->minute, t->sec);
 		write(bluetooth_info->btfd, name_msg, strlen(name_msg)); //읽은 메시지 블루투스로 전송
-		printf("bluetooth fd %d write ok\n", bluetooth_info->btfd);
+		printf("bluetooth fd %d write ok, %s\n", bluetooth_info->btfd, name_msg);
 		sleep(1);
 	}
 }

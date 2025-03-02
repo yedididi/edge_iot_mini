@@ -4,7 +4,7 @@ void serverOpen(char *argv[], pthread_mutex_t mutx, t_time_info *time_info)
 {
 	t_stm_info		stm_info;
     int serv_sock;
-	pthread_t *t_id = 0;
+	pthread_t t_id = 0;
     struct sockaddr_in serv_adr;
 	struct sockaddr_in clnt_adr;
     int sock_option = 1;
@@ -36,10 +36,12 @@ void serverOpen(char *argv[], pthread_mutex_t mutx, t_time_info *time_info)
 	stm_info.time_info = time_info;
 	pthread_mutex_unlock(&mutx);
 	sprintf(msg,"New connected! (ip:%s,fd:%d)\n", inet_ntoa(clnt_adr.sin_addr), clnt_sock);
+
 	log_file(msg);
 	write(clnt_sock, msg, strlen(msg));
-	pthread_create(t_id, NULL, stm_connection, (void *)&stm_info); //start thread
-	pthread_detach(*t_id);
+	printf("before creating thread\n");
+	pthread_create(&t_id, NULL, stm_connection, (void *)&stm_info); //start thread
+	pthread_detach(t_id);
 }
 
 void bluetoothConnect(char dest[18], t_time_info *time_info)

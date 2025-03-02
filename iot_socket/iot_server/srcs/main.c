@@ -8,8 +8,9 @@ int main(int argc, char *argv[])
 	t_time_info *time_info = 0;
 
 	time_info = initMain(argc, argv, &mutx);
-	bluetoothConnect(dest, time_info);
 	serverOpen(argv, mutx, time_info);
+	bluetoothConnect(dest, time_info);
+	// serverOpen(argv, mutx, time_info);
 
 	while (1)
 	{
