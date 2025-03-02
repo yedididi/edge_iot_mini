@@ -7,46 +7,46 @@ void	*stm_connection(void *arg)
 
 	while (1)
 	{
-		// printf("stm thread, writing to stm\n");
-		// write(stm_info->fd, "stm connected\n", 14);
+		printf("stm thread, writing to stm, fd:%d\n", stm_info->fd);
+		write(stm_info->fd, "stm connected\n", 14);
 
-		if (stm_info->time_info->hour_until_alarm == 0 && stm_info->time_info->minute_until_alarm <= 10)
-		{
-			char msg[BUF_SIZE];
-			pid_t buttonId;
-			pthread_create(&buttonId, NULL, buttonThread, (void *)stm_info);
-			pthread_detach(buttonId);
+		// if (stm_info->time_info->hour_until_alarm == 0 && stm_info->time_info->minute_until_alarm <= 10)
+		// {
+		// 	char msg[BUF_SIZE];
+		// 	pthread_t buttonId;
+		// 	pthread_create(&buttonId, NULL, buttonThread, (void *)stm_info);
+		// 	pthread_detach(buttonId);
 
-			while (1)
-			{
+		// 	while (1)
+		// 	{
 				
-				if (stm_info->time_info->buttonPressed)
-				{
-					stm_info->time_info->led = 0;
-					stm_info->time_info->buzzer = 0;
-					stm_info->time_info->motor = 0;
-					sprintf(msg, "LED:%d,buzzer:%d,motor:%d\n", 0, 0, 0);
-					write(stm_info->fd, msg, strlen(msg));
-					break;
-				}
+		// 		if (stm_info->time_info->buttonPressed)
+		// 		{
+		// 			stm_info->time_info->led = 0;
+		// 			stm_info->time_info->buzzer = 0;
+		// 			stm_info->time_info->motor = 0;
+		// 			sprintf(msg, "LED:%d,buzzer:%d,motor:%d\n", 0, 0, 0);
+		// 			write(stm_info->fd, msg, strlen(msg));
+		// 			break;
+		// 		}
 
-				stm_info->time_info->led = 10 - stm_info->time_info->minute_until_alarm;
+		// 		stm_info->time_info->led = 10 - stm_info->time_info->minute_until_alarm;
 
-				if (stm_info->time_info->buzzer)
-					stm_info->time_info->buzzer = 1;
-				else if (stm_info->time_info->minute_until_alarm == 0)
-					stm_info->time_info->buzzer = 1;
+		// 		if (stm_info->time_info->buzzer)
+		// 			stm_info->time_info->buzzer = 1;
+		// 		else if (stm_info->time_info->minute_until_alarm == 0)
+		// 			stm_info->time_info->buzzer = 1;
 
-				if (stm_info->time_info->motor)
-					stm_info->time_info->motor = 1;
-				else if (stm_info->time_info->minute_until_alarm == 0)
-					stm_info->time_info->motor = 1;
+		// 		if (stm_info->time_info->motor)
+		// 			stm_info->time_info->motor = 1;
+		// 		else if (stm_info->time_info->minute_until_alarm == 0)
+		// 			stm_info->time_info->motor = 1;
 
-				sprintf(msg, "LED:%d,buzzer:%d,motor:%d\n", stm_info->time_info->led, stm_info->time_info->buzzer, stm_info->time_info->motor);
-				write(stm_info->fd, msg, strlen(msg));
-				sleep(1);
-			}
-		}
+		// 		sprintf(msg, "LED:%d,buzzer:%d,motor:%d\n", stm_info->time_info->led, stm_info->time_info->buzzer, stm_info->time_info->motor);
+		// 		write(stm_info->fd, msg, strlen(msg));
+		// 		sleep(1);
+		// 	}
+		// }
 
 		sleep(1);
 	}
@@ -105,7 +105,7 @@ void	*stm_connection(void *arg)
 	// return 0;
 }
 
-void buttonThread(void *arg)
+void *buttonThread(void *arg)
 {
 	t_stm_info *stm_info = (t_stm_info *)arg;
 	char readBuf[BUF_SIZE];
@@ -124,6 +124,7 @@ void buttonThread(void *arg)
 		else
 			printf("read error\n");
 	}
+	return (NULL);
 }
 
 // void send_msg(t_msg_info *msg_info, t_client_info *first_client_info)

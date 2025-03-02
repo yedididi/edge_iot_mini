@@ -79,6 +79,7 @@ void	bluetoothConnect(char dest[18], t_time_info *time_info);
 
 //stmThread.c
 void	*stm_connection(void *arg);
+void	*buttonThread(void *arg);
 
 //bluetoothThread.c
 void	*bluetoothThread(void *arg);
