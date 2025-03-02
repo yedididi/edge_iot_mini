@@ -44,7 +44,7 @@ void serverOpen(char *argv[], pthread_mutex_t mutx, t_time_info *time_info)
 
 void bluetoothConnect(char dest[18], t_time_info *time_info)
 {
-	t_bluetooth_info *bluetooth_info = 0;
+	t_bluetooth_info *bluetooth_info = (t_bluetooth_info *)malloc(sizeof(t_bluetooth_info));
 	pthread_t bluetoothId;
     struct sockaddr_rc addr = { 0 };
 
@@ -62,20 +62,6 @@ void bluetoothConnect(char dest[18], t_time_info *time_info)
 	addr.rc_channel = (uint8_t)1;
 	str2ba(dest, &addr.rc_bdaddr);
 
-	// printf("str2ba ok\n");
-
-	// bind(btfd, (struct sockaddr *)&addr, sizeof(addr));
-
-	// printf("listening for bluetooth...\n");
-
-	// listen(btfd, 1);
-
-	// printf("waiting for acception...\n");
-
-	// int arduinoFD = accept(btfd, NULL, NULL);
-
-	// printf("bluetooth socket accepted, %d\n", arduinoFD);
-
 	int ret = connect(btfd, (struct sockaddr *)&addr, sizeof(addr));
 	if(ret == -1){
 		perror("connect()");
@@ -83,7 +69,6 @@ void bluetoothConnect(char dest[18], t_time_info *time_info)
 	}
 
 	printf("connect ok\n");
-
 	bluetooth_info->btfd = btfd;
 	bluetooth_info->time_info = time_info;
 
