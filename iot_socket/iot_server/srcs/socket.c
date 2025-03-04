@@ -2,7 +2,7 @@
 
 void serverOpen(char *argv[], pthread_mutex_t mutx, t_time_info *time_info)
 {
-	t_stm_info		stm_info;
+	t_stm_info		*stm_info = (t_stm_info *)malloc(sizeof(t_stm_info)); //must free
     int serv_sock;
 	pthread_t t_id = 0;
     struct sockaddr_in serv_adr;
@@ -30,17 +30,18 @@ void serverOpen(char *argv[], pthread_mutex_t mutx, t_time_info *time_info)
 	int clnt_sock = accept(serv_sock, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
 
 	pthread_mutex_lock(&mutx);
-	stm_info.fd = clnt_sock;
-	strcpy(stm_info.ip, inet_ntoa(clnt_adr.sin_addr));
-	stm_info.mutx = &mutx;
-	stm_info.time_info = time_info;
+	stm_info->fd = clnt_sock;
+	strcpy(stm_info->ip, inet_ntoa(clnt_adr.sin_addr));
+	stm_info->mutx = &mutx;
+	stm_info->time_info = time_info;
 	pthread_mutex_unlock(&mutx);
-	sprintf(msg,"New connected! (ip:%s,fd:%d)\n", inet_ntoa(clnt_adr.sin_addr), clnt_sock);
 
+	sprintf(msg,"New connected! (ip:%s,fd:%d)\n", inet_ntoa(clnt_adr.sin_addr), clnt_sock);
 	log_file(msg);
 	write(clnt_sock, msg, strlen(msg));
-	printf("before creating thread\n");
-	pthread_create(&t_id, NULL, stm_connection, (void *)&stm_info); //start thread
+
+	printf("before creating thread, fd is:%d\n", stm_info->fd);
+	pthread_create(&t_id, NULL, stm_connection, (void *)stm_info); //start thread
 	pthread_detach(t_id);
 }
 

@@ -10,13 +10,12 @@ int main(int argc, char *argv[])
 	time_info = initMain(argc, argv, &mutx);
 	serverOpen(argv, mutx, time_info);
 	bluetoothConnect(dest, time_info);
-	// serverOpen(argv, mutx, time_info);
 
 	while (1)
 	{
 		time_info = updateTime(time_info);
-		// printTime(time_info);
-		usleep(100);
+		printTime(time_info);
+		sleep(1);
 	}
 	return 0;
 }

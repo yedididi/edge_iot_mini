@@ -21,8 +21,8 @@ t_time_info *initMain(int argc, char *argv[], pthread_mutex_t *mutx)
 	
 	time_info->timer = time(NULL);
 	time_info->t = localtime(&time_info->timer);
-	time_info->alarm_hour = 4;
-	time_info->alarm_minute = 0;
+	time_info->alarm_hour = 10;
+	time_info->alarm_minute = 35;
 	time_info->hour = time_info->t->tm_hour;
 	time_info->minute = time_info->t->tm_min;
 	time_info->sec = time_info->t->tm_sec;

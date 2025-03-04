@@ -39,7 +39,7 @@ t_time_info *updateTime(t_time_info *time_info)
             time_info->hour_until_alarm += 1;
         }
     }
-    else if (timeDifference == 1) //현재시간이 더 작은 경우
+    else if (timeDifference == -1) //현재시간이 더 작은 경우
     {
         time_info->hour_until_alarm = time_info->alarm_hour - time_info->hour;
         time_info->minute_until_alarm = time_info->alarm_minute - time_info->minute;
