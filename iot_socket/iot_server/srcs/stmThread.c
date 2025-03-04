@@ -9,15 +9,7 @@ void	*stm_connection(void *arg)
 
 	while (1)
 	{
-		// int retWrite = write(stm_info->fd, "[LYJ]LED@ON", strlen("[LYJ]LED@ON"));
-		// if (retWrite)
-		// 	printf("write ok, wrote %d, [LYJ]LED@ON\n", retWrite);
-		// sleep(5);
-		// retWrite = write(stm_info->fd, "[LYJ]LED@OFF", strlen("[LYJ]LED@OFF"));
-		// if (retWrite)
-		// 	printf("write ok, wrote %d, [LYJ]LED@OFF\n", retWrite);
-		// sleep(5);
-
+		printf("%d, %d\n", stm_info->time_info->hour_until_alarm, stm_info->time_info->minute_until_alarm);
 		if (stm_info->time_info->hour_until_alarm == 0 && stm_info->time_info->minute_until_alarm <= 10)
 		{
 			// char msg[BUF_SIZE];
@@ -56,11 +48,13 @@ void	*stm_connection(void *arg)
 
 				sprintf(msg, "LED@%d@buzzer@%d@motor@%d\n", stm_info->time_info->led, stm_info->time_info->buzzer, stm_info->time_info->motor);
 				write(stm_info->fd, msg, strlen(msg));
+				printf("%d:%d:%d, msg:%s\n", stm_info->time_info->hour, stm_info->time_info->minute, stm_info->time_info->sec, msg);
 				sleep(1);
 			}
 		}
 		memset(msg, 0x0, BUF_SIZE);
 		sprintf(msg, "LED@%d@buzzer@%d@motor@%d\n", 0, 0, 0);
+		printf("%s\n", msg);
 		write(stm_info->fd, msg, strlen(msg));
 		sleep(1);
 	}
